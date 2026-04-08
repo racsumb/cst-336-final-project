@@ -21,24 +21,20 @@
         <section class="panel">
             <h3>📊 Hero Stats</h3>
             <form id="stats-form">
+                
                 <div class="form-group">
                     <label>Sleep (Hours)</label>
                     <input type="number" id="sleep-input" name="sleep_hours" value="7.5" step="0.5" required>
                 </div>
                 
                 <div class="form-group">
-                    <label>Diet Status</label>
-                    <label>
-                        <input type="radio" name="diet_status" value="clean" checked> Clean
-                    </label>
-                    <label>
-                        <input type="radio" name="diet_status" value="cheat"> Cheat
-                    </label>
+                    <label>Workout Time (Minutes)</label>
+                    <input type="number" id="workout-input" name="workout_time" value="30" min="0" required>
                 </div>
                 
                 <div class="form-group">
-                    <label>Captain's Log</label>
-                    <textarea id="notes-input" name="notes" rows="4" placeholder="How went the day's journey?"></textarea>
+                    <label>Mood</label>
+                    <input type="text" id="mood-input" name="mood" placeholder="e.g., Rested and Ready" required>
                 </div>
                 
                 <button type="submit" id="update-stats-btn">Update Stats</button>
