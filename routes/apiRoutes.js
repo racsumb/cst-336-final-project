@@ -45,4 +45,5 @@ router.post('/login', async (req, res) => {
     }
 });
 
+// This is a simple route to test if the API is working
 module.exports = router;
