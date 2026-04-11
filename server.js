@@ -1,4 +1,5 @@
 require('dotenv').config();
+const mysql = require('mysql2/promise');
 const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -14,11 +15,11 @@ app.set('view engine', 'ejs');
 // Route Setup
 const indexRoutes = require('./routes/indexRoutes');
 // TODO: Add API routes to actually do things with the Database
-// const apiRoutes = require('./routes/apiRoutes');
+const apiRoutes = require('./routes/apiRoutes');
 
 app.use('/', indexRoutes);
 // TODO: Uncomment this when we have API routes
-// app.use('/api', apiRoutes);
+app.use('/api', apiRoutes);
 
 // Start Server
 app.listen(PORT, () => {

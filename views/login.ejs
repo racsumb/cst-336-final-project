@@ -20,7 +20,7 @@
         <section class="panel auth-panel">
             <h3>Login</h3>
             
-            <form action="/api/login" method="POST">
+            <form action="/api/login" method="POST" id="login-form">
                 <div class="form-group">
                     <label style="text-align: left;">Username</label>
                     <input type="text" name="username" required>
@@ -29,6 +29,7 @@
                 <div class="form-group">
                     <label style="text-align: left;">Password</label>
                     <input type="password" name="password" required>
+                    <div id="login-error"></div>
                 </div>
                 
                 <button type="submit" style="width: 100%;">Login</button>
@@ -40,5 +41,6 @@
         </section>
     </main>
 
+    <script src="/js/app.js"></script>
 </body>
 </html>
