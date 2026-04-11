@@ -3,27 +3,45 @@ const router = express.Router();
 const db = require('../database/db');
 
 router.post('/login', async (req, res) => {
-    const {username, password }  = req.body;
+    const { username, password } = req.body;
 
     try {
         const [rows] = await db.execute(
             `SELECT *
              FROM users
              WHERE username = ?`,
-             [username]
+            [username]
         );
 
         const user = rows[0];
 
-        // TODO: Add encryption
+        // I check if the user exists AND if the password matches
+        // (for now it's plain text, later we would hash it)
         if (user && user.password === password) {
-            res.json({ success: true, message: "Logged in" });
+
+            // I return success AND the userId so the frontend can use it
+            res.json({
+                success: true,
+                message: "Logged in",
+                userId: user.id
+            });
+
         } else {
-            res.status(401).json({ success: false, message: "Invalid username or password" });
+            // If login fails, I return an error message
+            res.status(401).json({
+                success: false,
+                message: "Invalid username or password"
+            });
         }
+
     } catch (error) {
         console.error(error);
-        res.status(500).json({ success: false, message: "Internal server error" });
+
+        // If something breaks, I return a server error
+        res.status(500).json({
+            success: false,
+            message: "Internal server error"
+        });
     }
 });
 
