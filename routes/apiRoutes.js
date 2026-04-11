@@ -104,4 +104,39 @@ router.post('/quests', async (req, res) => {
     }
 });
 
+// ===============================
+// UPDATE QUEST COMPLETION STATUS
+// ===============================
+router.put('/quests/:id', async (req, res) => {
+
+    const { is_completed } = req.body;
+    const questId = req.params.id;
+
+    try {
+        // I update the quest's completed status based on its id
+        const [result] = await db.query(
+            `UPDATE quests
+             SET is_completed = ?
+             WHERE id = ?`,
+            [is_completed, questId]
+        );
+
+        // I return success if the update worked
+        res.json({
+            success: true,
+            message: "Quest updated successfully",
+            affectedRows: result.affectedRows
+        });
+
+    } catch (error) {
+        console.error(error);
+
+        // If something breaks, I return an error
+        res.status(500).json({
+            success: false,
+            message: "Failed to update quest"
+        });
+    }
+});
+
 module.exports = router;
