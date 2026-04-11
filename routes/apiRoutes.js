@@ -45,5 +45,63 @@ router.post('/login', async (req, res) => {
     }
 });
 
-// This is a simple route to test if the API is working
+// ===============================
+// GET QUESTS FOR A USER
+// ===============================
+router.get('/quests/:userId', async (req, res) => {
+    try {
+        const userId = req.params.userId;
+
+        // I query the database to get all quests that belong to this user
+        const [rows] = await db.query(
+            `SELECT * FROM quests WHERE user_id = ?`,
+            [userId]
+        );
+
+        // I send the quests back as JSON so the frontend can display them
+        res.json(rows);
+
+    } catch (error) {
+        console.error(error);
+
+        // If something goes wrong, I return an error
+        res.status(500).json({
+            error: "Failed to fetch quests"
+        });
+    }
+});
+
+// ===============================
+// ADD A NEW QUEST
+// ===============================
+router.post('/quests', async (req, res) => {
+
+    const { user_id, quest_title, category, difficulty } = req.body;
+
+    try {
+        // I insert a new quest into the database for the current user
+        const [result] = await db.query(
+            `INSERT INTO quests (user_id, quest_title, category, difficulty)
+             VALUES (?, ?, ?, ?)`,
+            [user_id, quest_title, category, difficulty]
+        );
+
+        // I return success and the new quest id
+        res.json({
+            success: true,
+            message: "Quest added successfully",
+            questId: result.insertId
+        });
+
+    } catch (error) {
+        console.error(error);
+
+        // If something breaks, I return an error
+        res.status(500).json({
+            success: false,
+            message: "Failed to add quest"
+        });
+    }
+});
+
 module.exports = router;
