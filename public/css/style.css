@@ -152,3 +152,10 @@ button:active {
 #random-workout-btn:hover {
     background-color: #724e82;
 }
+
+#login-error {
+    color: #ff4d4d;
+    font-weight: bold;
+    margin-top: 4px;
+    height: 10px;
+}
