@@ -139,4 +139,36 @@ router.put('/quests/:id', async (req, res) => {
     }
 });
 
+// ===============================
+// DELETE A QUEST
+// ===============================
+router.delete('/quests/:id', async (req, res) => {
+
+    const questId = req.params.id;
+
+    try {
+        // I delete the quest based on its id
+        const [result] = await db.query(
+            `DELETE FROM quests WHERE id = ?`,
+            [questId]
+        );
+
+        // I return success if the delete worked
+        res.json({
+            success: true,
+            message: "Quest deleted successfully",
+            affectedRows: result.affectedRows
+        });
+
+    } catch (error) {
+        console.error(error);
+
+        // If something breaks, I return an error
+        res.status(500).json({
+            success: false,
+            message: "Failed to delete quest"
+        });
+    }
+});
+
 module.exports = router;
