@@ -46,6 +46,49 @@ router.post('/login', async (req, res) => {
 });
 
 // ===============================
+// REGISTER A NEW USER
+// ===============================
+router.post('/register', async (req, res) => {
+    const { username, password } = req.body;
+
+    try {
+        // check if the username is taken
+        const [existingUsers] = await db.execute(
+            `SELECT * FROM users WHERE username = ?`, 
+            [username]
+        );
+
+        if (existingUsers.length > 0) {
+            return res.status(400).json({ 
+                success: false, 
+                message: "That hero name is already taken!" 
+            });
+        }
+
+        // if its available, insert the new user into the database
+        const [result] = await db.execute(
+            `INSERT INTO users (username, password, current_level, total_xp)
+             VALUES (?, ?, 1, 0)`,
+            [username, password]
+        );
+
+        // return success and the newly created ID
+        res.json({
+            success: true,
+            message: "Account created successfully",
+            userId: result.insertId
+        });
+
+    } catch (error) {
+        console.error("Registration error:", error);
+        res.status(500).json({
+            success: false,
+            message: "Internal server error"
+        });
+    }
+});
+
+// ===============================
 // GET QUESTS FOR A USER
 // ===============================
 router.get('/quests/:userId', async (req, res) => {

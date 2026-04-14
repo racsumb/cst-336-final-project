@@ -8,56 +8,119 @@ document.addEventListener('DOMContentLoaded', () => {
     const addQuestBtn = document.getElementById('add-quest-btn');
     const questList = document.getElementById('quest-list');
 
-    // TODO: Get a quote and display it
-    // TODO: Get a background image and display it
-    // TODO: Validate / Deal with Forms
+    const currentPath = window.location.pathname;
+    const loggedInUserId = localStorage.getItem('userId');
 
-    initLogin(); // Initializes login screen logic and functionality
+    // The following two if statements deal with authentication state
 
-});
-
-async function initLogin() {
-    const loginForm = document.getElementById('login-form');
-    const errorDisplay = document.getElementById('login-error');
-
-    if (!loginForm) {
+    // If trying to access the dashboard without being logged in -> kick back to login
+    if (currentPath === '/quests' && !loggedInUserId) {
+        window.location.href = '/';
         return;
     }
+
+    // If trying to view login/register while already logged in -> kick to Dashboard
+    if ((currentPath === '/' || currentPath === '/register') && loggedInUserId) {
+        window.location.href = '/quests';
+        return; 
+    }
+
+    // Only run the functions relevant to the page we are actually on
+    if (currentPath === '/') {
+        initLogin();
+    } else if (currentPath === '/register') {
+        initRegister();
+    } else if (currentPath === '/quests') {
+        initLogout();
+        // TODO: This is where all our client-side logic functions should be called / go
+        // TODO: Get a quote and display it
+        // TODO: Get a background image and display it
+        // TODO: Validate / Deal with Forms
+    }
+});
+
+function initLogin() {
+    const loginForm = document.querySelector('form'); // Grabs the first form on the page
+    const errorDisplay = document.getElementById('login-error'); // Make sure this empty div exists in your HTML!
+
+    if (!loginForm) return;
 
     loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        const usernameInput = loginForm.querySelector('input[name="username"]');
-        const passwordInput = loginForm.querySelector('input[name="password"]');
-
-        const loginData = {
-            username: usernameInput.value.trim(),
-            password: passwordInput.value
-        };
+        const usernameInput = loginForm.querySelector('input[name="username"]').value.trim();
+        const passwordInput = loginForm.querySelector('input[name="password"]').value;
 
         try {
             const response = await fetch('/api/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(loginData)
+                body: JSON.stringify({ username: usernameInput, password: passwordInput })
             });
 
             const result = await response.json();
 
             if (result.success) {
+                // save the user ID to web storage
+                localStorage.setItem('userId', result.userId);
+                // redirect to the dashboard
                 window.location.href = "/quests";
             } else {
-                errorDisplay.textContent = result.message || "Login failed";
+                if(errorDisplay) errorDisplay.textContent = result.message || "Login failed";
+                else alert(result.message);
             }
         } catch (error) {
             console.error("Error logging in:", error);
             alert("Something went wrong. Please try again later.");
         }
     });
+}
 
-    loginForm.addEventListener('input', () => {
-        if (errorDisplay) {
-            errorDisplay.textContent = "";
+function initRegister() {
+    const registerForm = document.querySelector('form');
+    
+    if (!registerForm) return;
+
+    registerForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const usernameInput = registerForm.querySelector('input[name="username"]').value.trim();
+        const passwordInput = registerForm.querySelector('input[name="password"]').value;
+
+        try {
+            const response = await fetch('/api/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: usernameInput, password: passwordInput })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                //automatically log them in by setting the storage
+                localStorage.setItem('userId', result.userId);
+                // redirect directly to their new dashboard
+                window.location.href = "/quests";
+            } else {
+                // show error message when needed
+                alert(result.message);
+            }
+        } catch (error) {
+            console.error("Error registering:", error);
+            alert("Something went wrong. Please try again later.");
         }
-    })
+    });
+}
+
+function initLogout() {
+    const logoutBtn = document.getElementById('logout-btn');
+    
+    if (!logoutBtn) return;
+
+    logoutBtn.addEventListener('click', () => {
+        // remove auth state
+        localStorage.removeItem('userId');
+        // kick back to the login page
+        window.location.href = '/';
+    });
 }
