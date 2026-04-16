@@ -54,14 +54,14 @@ router.post('/register', async (req, res) => {
     try {
         // check if the username is taken
         const [existingUsers] = await db.execute(
-            `SELECT * FROM users WHERE username = ?`, 
+            `SELECT * FROM users WHERE username = ?`,
             [username]
         );
 
         if (existingUsers.length > 0) {
-            return res.status(400).json({ 
-                success: false, 
-                message: "That hero name is already taken!" 
+            return res.status(400).json({
+                success: false,
+                message: "That hero name is already taken!"
             });
         }
 
@@ -210,6 +210,36 @@ router.delete('/quests/:id', async (req, res) => {
         res.status(500).json({
             success: false,
             message: "Failed to delete quest"
+        });
+    }
+});
+
+// ===============================
+// GET DAILY STATS FOR A USER
+// ===============================
+router.get('/stats/:userId', async (req, res) => {
+
+    const userId = req.params.userId;
+
+    try {
+        // I get the user's daily stats for today
+        const [rows] = await db.query(
+            `SELECT * FROM daily_stats
+             WHERE user_id = ?
+             AND log_date = CURDATE()`,
+            [userId]
+        );
+
+        // I send back today's stats if they exist, otherwise an empty object
+        res.json(rows[0] || {});
+
+    } catch (error) {
+        console.error(error);
+
+        // If something breaks, I return an error
+        res.status(500).json({
+            success: false,
+            message: "Failed to fetch daily stats"
         });
     }
 });
