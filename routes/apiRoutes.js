@@ -301,4 +301,35 @@ router.post('/stats', async (req, res) => {
     }
 });
 
+// ===============================
+// GET STATS HISTORY FOR A USER
+// ===============================
+router.get('/stats/history/:userId', async (req, res) => {
+
+    const userId = req.params.userId;
+
+    try {
+        // I get all historical daily stats for this user ordered by newest first
+        const [rows] = await db.query(
+            `SELECT *
+             FROM daily_stats
+             WHERE user_id = ?
+             ORDER BY log_date DESC`,
+            [userId]
+        );
+
+        // I return all saved stats history as JSON
+        res.json(rows);
+
+    } catch (error) {
+        console.error(error);
+
+        // If something breaks, I return an error
+        res.status(500).json({
+            success: false,
+            message: "Failed to fetch stats history"
+        });
+    }
+});
+
 module.exports = router;
