@@ -244,4 +244,61 @@ router.get('/stats/:userId', async (req, res) => {
     }
 });
 
+// ===============================
+// SAVE OR UPDATE DAILY STATS
+// ===============================
+router.post('/stats', async (req, res) => {
+
+    const { user_id, sleep_hours, workout_time, mood } = req.body;
+
+    try {
+        // First I check if the user already has stats saved for today
+        const [existingRows] = await db.query(
+            `SELECT id
+             FROM daily_stats
+             WHERE user_id = ?
+             AND log_date = CURDATE()`,
+            [user_id]
+        );
+
+        if (existingRows.length > 0) {
+            // If today's stats already exist, I update them
+            await db.query(
+                `UPDATE daily_stats
+                 SET sleep_hours = ?, workout_time = ?, mood = ?
+                 WHERE user_id = ?
+                 AND log_date = CURDATE()`,
+                [sleep_hours, workout_time, mood, user_id]
+            );
+
+            res.json({
+                success: true,
+                message: "Daily stats updated successfully"
+            });
+
+        } else {
+            // If today's stats do not exist yet, I insert a new row
+            await db.query(
+                `INSERT INTO daily_stats (user_id, log_date, sleep_hours, workout_time, mood)
+                 VALUES (?, CURDATE(), ?, ?, ?)`,
+                [user_id, sleep_hours, workout_time, mood]
+            );
+
+            res.json({
+                success: true,
+                message: "Daily stats saved successfully"
+            });
+        }
+
+    } catch (error) {
+        console.error(error);
+
+        // If something breaks, I return an error
+        res.status(500).json({
+            success: false,
+            message: "Failed to save daily stats"
+        });
+    }
+});
+
 module.exports = router;
