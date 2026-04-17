@@ -333,25 +333,53 @@ router.get('/stats/history/:userId', async (req, res) => {
     }
 });
 
-// === Quote Proxy Route ===
+
+// ===============================
+// GET RANDOM QUOTE
+// ===============================
 router.get("/quote", async (req, res) => {
   try {
-    const response = await fetch("https://api.quotable.io/quotes/random");
+    const response = await fetch("https://zenquotes.io/api/random");
     const data = await response.json();
-    console.log(`${data.content} —${data.author}`)
+
+    const quote = data[0]; // ZenQuotes returns an array
+
     res.json({
-      content: data.content,
-      author: data.author
+      content: quote.q,
+      author: quote.a
     });
 
   } catch (err) {
-    console.error("Quote fetch failed:", err);
+    console.error("ZenQuotes fetch failed:", err);
     res.status(500).json({
       content: "Even the bravest heroes face cloudy omens.",
       author: "Unknown Sage"
     });
   }
 });
+
+// ===============================
+// GET RANDOM BACKGROUND IMAGE
+// ===============================
+router.get("/background", async (req, res) => {
+  try {
+    const response = await fetch(
+      `https://api.unsplash.com/photos/random?query=fantasy landscape mountains&orientation=landscape&client_id=${process.env.UNSPLASH_KEY}`
+    );
+
+    const data = await response.json();
+    console.log("Unsplash raw response:", data);
+
+    res.json({
+      url: data?.urls?.full || "/img/fallback-fantasy.jpg"
+    });
+
+  } catch (err) {
+    console.error("Unsplash fetch failed:", err);
+    res.json({ url: "/img/fallback-fantasy.jpg" });
+  }
+});
+
 
 
 module.exports = router;

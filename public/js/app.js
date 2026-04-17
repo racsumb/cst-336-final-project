@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
         initLogout();
         // TODO: This is where all our client-side logic functions should be called / go
         loadDailyQuote();
-        // TODO: Get a background image and display it
+        loadRandomBackground();
         // TODO: Validate / Deal with Forms
     }
 });
@@ -129,15 +129,25 @@ function initLogout() {
 async function loadDailyQuote() {
     const quoteEl = document.getElementById('daily-quote');
     if (!quoteEl) return;
-
     try {
-
         const response = await fetch("/api/quote");
         const data = await response.json();
         quoteEl.textContent = `"${data.content}" — ${data.author}`;
-
     } catch (err) {
         console.error("Quote fetch failed:", err);
         quoteEl.textContent = `"Even the bravest heroes face cloudy omens. Try again soon."`;
     }
+}
+
+async function loadRandomBackground() {
+  try {
+    const response = await fetch("/api/background");
+    const data = await response.json();
+    document.body.style.backgroundImage = `url('${data.url}')`;
+    document.body.style.backgroundSize = "cover";
+    document.body.style.backgroundPosition = "center";
+    document.body.style.backgroundRepeat = "no-repeat";
+  } catch (err) {
+    console.error("Background fetch failed:", err);
+  }
 }
