@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } else if (currentPath === '/quests') {
         initLogout();
         // TODO: This is where all our client-side logic functions should be called / go
-        // TODO: Get a quote and display it
+        loadDailyQuote();
         // TODO: Get a background image and display it
         // TODO: Validate / Deal with Forms
     }
@@ -123,4 +123,21 @@ function initLogout() {
         // kick back to the login page
         window.location.href = '/';
     });
+}
+
+
+async function loadDailyQuote() {
+    const quoteEl = document.getElementById('daily-quote');
+    if (!quoteEl) return;
+
+    try {
+
+        const response = await fetch("/api/quote");
+        const data = await response.json();
+        quoteEl.textContent = `"${data.content}" — ${data.author}`;
+
+    } catch (err) {
+        console.error("Quote fetch failed:", err);
+        quoteEl.textContent = `"Even the bravest heroes face cloudy omens. Try again soon."`;
+    }
 }
