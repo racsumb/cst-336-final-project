@@ -1,6 +1,8 @@
 // Wait for the HTML to fully load before running any scripts
 document.addEventListener('DOMContentLoaded', () => {
-    
+    const bgEl = document.getElementById('pageBackground');
+    if (bgEl) loadRandomBackground();
+
     // Target DOM elements
     const quoteElement = document.getElementById('daily-quote');
     const statsForm = document.getElementById('stats-form');
@@ -34,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
         initLogout();
         // TODO: This is where all our client-side logic functions should be called / go
         loadDailyQuote();
-        loadRandomBackground();
+        // loadRandomBackground();
         // TODO: Validate / Deal with Forms
     }
 });

@@ -4,13 +4,11 @@ body {
     margin: 0;
     padding: 0;
     line-height: 1.6;
-
-    /* Background behavior */
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
     background-attachment: fixed;
-    background-color: #121418;
+    background-color: #121418;    
 }
 
 h1, h2, h3 {
