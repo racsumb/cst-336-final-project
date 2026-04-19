@@ -275,6 +275,7 @@ async function loadQuests() {
                     <input type="checkbox" data-id="${quest.id}" ${isChecked}> 
                     ${quest.quest_title} (${quest.difficulty})
                 </label>
+                <button class="delete-quest-btn" data-id="${quest.id}" title="Remove Quest">🔥</button>
             `;
 
             // attach the event listener to the checkbox we just created
@@ -312,6 +313,34 @@ async function loadQuests() {
                     console.error("Failed to update quest status", err);
                     alert("The magic faded. Could not update quest.");
                     e.target.checked = !e.target.checked; // Revert the visual check if DB fails
+                }
+            });
+
+            // Attach event listener to the qust deletion button
+            const deleteBtn = questDiv.querySelector('.delete-quest-btn');
+            deleteBtn.addEventListener('click', async (e) => {
+                const questId = e.target.getAttribute('data-id');
+                
+                // The Confirmation Prompt
+                const confirmed = confirm("Are you sure you want to incinerate this quest?");
+                
+                if (confirmed) {
+                    try {
+                        const response = await fetch(`/api/quests/${questId}`, {
+                            method: 'DELETE'
+                        });
+
+                        const result = await response.json();
+
+                        if (result.success) {
+                            loadQuests(); // Refresh the quest list after removing quest
+                        } else {
+                            alert("The quest resisted destruction: " + result.message);
+                        }
+                    } catch (err) {
+                        console.error("Failed to delete quest:", err);
+                        alert("A magical interference prevented the deletion.");
+                    }
                 }
             });
 
