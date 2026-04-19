@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../database/db');
+const bcrypt = require('bcrypt');
+const saltRounds = 10; // Complexity of bcrypt encyrption
 
 
 // ===============================
@@ -18,16 +20,14 @@ router.post('/login', async (req, res) => {
         );
 
         const user = rows[0];
+        const isMatch = await bcrypt.compare(password, user.password);
 
-        // TODO: Encrypt passwords
-        if (user && user.password === password) {
-
+        if (user && isMatch) {
             res.json({
                 success: true,
                 message: "Logged in",
                 userId: user.id
             });
-
         } else {
             res.status(401).json({
                 success: false,
@@ -37,7 +37,7 @@ router.post('/login', async (req, res) => {
 
     } catch (error) {
         console.error(error);
-        
+
         res.status(500).json({
             success: false,
             message: "Internal server error"
@@ -65,11 +65,13 @@ router.post('/register', async (req, res) => {
             });
         }
 
+        const hashedPassword = await bcrypt.hash(password,saltRounds);
+
         // if its available, insert the new user into the database
         const [result] = await db.execute(
             `INSERT INTO users (username, password, current_level, total_xp)
              VALUES (?, ?, 1, 0)`,
-            [username, password]
+            [username, hashedPassword]
         );
 
         // return success and the newly created ID
