@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // If trying to view login/register while already logged in -> kick to Dashboard
     if ((currentPath === '/' || currentPath === '/register') && loggedInUserId) {
-        window.location.href = '/quests';
+        window.location.href = `/quests?userId=${loggedInUserId}`;
         return; 
     }
 
@@ -38,7 +38,20 @@ document.addEventListener('DOMContentLoaded', () => {
         loadDailyQuote();
         // loadRandomBackground();
         // TODO: Validate / Deal with Forms
-    }
+
+        const statsBtn = document.getElementById('view-stats-btn');
+            if (statsBtn) {
+                statsBtn.addEventListener('click', () => {
+                    const userId = localStorage.getItem('userId');
+                    window.location.href = `/stats?userId=${userId}`;
+                });
+            }
+            
+    } else if (currentPath === '/stats') {
+    loadStatsHistory();
+}
+
+    
 });
 
 function initLogin() {
@@ -66,7 +79,7 @@ function initLogin() {
                 // save the user ID to web storage
                 localStorage.setItem('userId', result.userId);
                 // redirect to the dashboard
-                window.location.href = "/quests";
+                window.location.href = `/quests?userId=${result.userId}`;
             } else {
                 if(errorDisplay) errorDisplay.textContent = result.message || "Login failed";
                 else alert(result.message);
@@ -102,7 +115,7 @@ function initRegister() {
                 //automatically log them in by setting the storage
                 localStorage.setItem('userId', result.userId);
                 // redirect directly to their new dashboard
-                window.location.href = "/quests";
+                window.location.href = `/quests?userId=${result.userId}`;
             } else {
                 // show error message when needed
                 alert(result.message);
@@ -152,4 +165,22 @@ async function loadRandomBackground() {
   } catch (err) {
     console.error("Background fetch failed:", err);
   }
+}
+
+async function loadStatsHistory() {
+    const container = document.getElementById('stats-history');
+    if (!container) return;
+
+    const userId = localStorage.getItem('userId');
+    const response = await fetch(`/api/stats/history/${userId}`);
+    const history = await response.json();
+
+    container.innerHTML = history.map(entry => `
+        <div class="stats-card">
+            <h3>${entry.log_date}</h3>
+            <p><strong>Sleep:</strong> ${entry.sleep_hours} hrs</p>
+            <p><strong>Workout:</strong> ${entry.workout_time} min</p>
+            <p><strong>Mood:</strong> ${entry.mood}</p>
+        </div>
+    `).join('');
 }
