@@ -57,6 +57,39 @@
         </section>
     </main>
 
+    <div id="quest-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <h2>⚔️ New Quest</h2>
+            <form id="new-quest-form">
+                <label for="quest-title">Quest Name:</label>
+                <input type="text" id="quest-title" name="quest-title" placeholder="e.g. Conquer the Gym" required>
+
+                <label for="quest-category">Category:</label>
+                <select id="quest-category" name="quest-category">
+                    <option value="Fitness">Fitness</option>
+                    <option value="Financial">Financial</option>
+                    <option value="Productivity">Productivity</option>
+                    <option value="Hobbies">Hobbies</option>
+                    <option value="Learning">Learning</option>
+                    <option value="Social">Social</option>
+                </select>
+
+                <label for="quest-difficulty">Difficulty:</label>
+                <select id="quest-difficulty" name="quest-difficulty">
+                    <option value="Easy">Easy (10 XP)</option>
+                    <option value="Medium">Medium (25 XP)</option>
+                    <option value="Hard">Hard (50 XP)</option>
+                    <option value="Expert">Expert (100 XP)</option>
+                </select>
+
+                <div class="modal-actions">
+                    <button type="submit" class="accept-btn">Accept Quest</button>
+                    <button type="button" id="close-modal" class="cancel-btn">Abandon</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script src="/js/app.js"></script>
 </body>
 </html>

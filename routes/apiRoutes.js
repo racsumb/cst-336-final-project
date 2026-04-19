@@ -122,6 +122,11 @@ router.post('/quests', async (req, res) => {
 
     const { user_id, quest_title, category, difficulty } = req.body;
 
+    // Server side validation for user inputs
+    if (!user_id || !quest_title) {
+        return res.status(400).json({ success: false, message: "Failed to add quest" });
+    }
+
     try {
         // I insert a new quest into the database for the current user
         const [result] = await db.query(

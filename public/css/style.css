@@ -176,3 +176,47 @@ button:active {
     margin-top: 4px;
     height: 10px;
 }
+
+.modal-overlay {
+    display: none; 
+    position: fixed;
+    z-index: 2000;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(0, 0, 0, 0.85);
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: rgba(244, 232, 193, 0.95);
+    color: #2c2c2c;
+    padding: 2rem;
+    border: 4px double #8b7355;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 450px;
+    box-shadow: 0 0 30px rgba(0,0,0,0.5);
+}
+
+.modal-content label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+    color: #2c2c2c;
+}
+
+.modal-content select {
+    width: 100%;
+    padding: 0.75rem;
+    margin-bottom: 1.5rem;
+    border-radius: 4px;
+    background-color: rgba(244, 232, 193);
+    font-family: inherit;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 1rem;
+}

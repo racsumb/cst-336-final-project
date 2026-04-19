@@ -71,11 +71,11 @@ document.addEventListener('DOMContentLoaded', () => {
         initRegister();
     } else if (currentPath === '/quests') {
         initLogout();
-        // TODO: This is where all our client-side logic functions should be called / go
         loadDailyQuote();
         // loadRandomBackground();
         // TODO: Validate / Deal with Forms
         loadQuests();
+        initQuestModal();
         const statsBtn = document.getElementById('view-stats-btn');
             if (statsBtn) {
                 statsBtn.addEventListener('click', () => {
@@ -324,4 +324,67 @@ async function loadQuests() {
         console.error("Error loading quests:", error);
         questList.innerHTML = '<p style="color: #ff4c4c;">Failed to load quests from the server.</p>';
     }
+}
+
+function initQuestModal() {
+    const questModal = document.getElementById('quest-modal');
+    const openBtn = document.getElementById('add-quest-btn');
+    const closeBtn = document.getElementById('close-modal');
+    const questForm = document.getElementById('new-quest-form');
+
+    // Early exit if buttons do not exist
+    if (!questModal || !openBtn || !questForm) {
+        return;
+    }
+
+    // Local event listeners
+    openBtn.addEventListener('click', () => {
+        questModal.style.display = 'flex';
+    });
+
+    closeBtn.addEventListener('click', () => {
+        questModal.style.display = 'none';
+    });
+
+    // Close if user clicks outside the parchment box
+    window.addEventListener('click', (e) => {
+        if (e.target === questModal) {
+            questModal.style.display = 'none';
+        }
+    });
+
+    // Form Submission
+    questForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const userId = localStorage.getItem('userId');
+        const questData = {
+            user_id: userId,
+            quest_title: document.getElementById('quest-title').value.trim(),
+            category: document.getElementById('quest-category').value,
+            difficulty: document.getElementById('quest-difficulty').value
+        };
+
+        try {
+            const response = await fetch('/api/quests', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(questData)
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                questModal.style.display = 'none';
+                questForm.reset();
+                // Refresh the quest list immediately after adding a new quest
+                loadQuests(); 
+            } else {
+                alert("The quest log rejected your entry: " + result.message);
+            }
+        } catch (err) {
+            console.error("Error adding quest:", err);
+            alert("A scroll error occurred. Check the console.");
+        }
+    });
 }
