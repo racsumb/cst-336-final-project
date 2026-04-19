@@ -2,9 +2,10 @@
     <a href="/" id="home-link"><h1>Quest of Life</h1></a>
 
     <% if (typeof user !== "undefined" && user) { %>
-
-        <div>Level <%= playerLevel %> | XP: <%= playerXp %>/1000</div>
-
+        <div>
+            <span id="player-level-display">Level <%= playerLevel %></span> | 
+            <span id="player-xp-display">XP: <%= playerXp %>/<%= (playerLevel + 1) * 100 %></span>
+        </div>
     <% } %>
 
     <nav>

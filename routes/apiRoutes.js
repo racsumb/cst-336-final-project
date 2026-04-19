@@ -149,41 +149,6 @@ router.post('/quests', async (req, res) => {
 });
 
 // ===============================
-// UPDATE QUEST COMPLETION STATUS
-// ===============================
-router.put('/quests/:id', async (req, res) => {
-
-    const { is_completed } = req.body;
-    const questId = req.params.id;
-
-    try {
-        // I update the quest's completed status based on its id
-        const [result] = await db.query(
-            `UPDATE quests
-             SET is_completed = ?
-             WHERE id = ?`,
-            [is_completed, questId]
-        );
-
-        // I return success if the update worked
-        res.json({
-            success: true,
-            message: "Quest updated successfully",
-            affectedRows: result.affectedRows
-        });
-
-    } catch (error) {
-        console.error(error);
-
-        // If something breaks, I return an error
-        res.status(500).json({
-            success: false,
-            message: "Failed to update quest"
-        });
-    }
-});
-
-// ===============================
 // DELETE A QUEST
 // ===============================
 router.delete('/quests/:id', async (req, res) => {
@@ -333,27 +298,6 @@ router.get('/stats/history/:userId', async (req, res) => {
     }
 });
 
-router.post('/stats', async (req, res) => {
-    const { userId, sleep_hours, workout_time, mood } = req.body;
-
-    try {
-        await db.query(
-            `INSERT INTO daily_stats (user_id, log_date, sleep_hours, workout_time, mood)
-             VALUES (?, CURDATE(), ?, ?, ?)`,
-            [userId, sleep_hours, workout_time, mood]
-        );
-
-        res.json({ success: true });
-
-    } catch (error) {
-        console.error("🔥 MySQL INSERT ERROR:", error);   // <‑‑ ADD THIS
-        res.status(500).json({ success: false, message: "Failed to save stats" });
-    }
-});
-
-
-
-
 // ===============================
 // GET RANDOM QUOTE
 // ===============================
@@ -400,25 +344,56 @@ router.get("/background", async (req, res) => {
   }
 });
 
-router.get('/stats', async (req, res) => {
-    const userId = req.query.userId;
-    if (!userId) return res.redirect('/');
+// ===============================
+// UPDATE QUEST COMPLETION STATUS & CALCULATE XP
+// ===============================
+router.put('/quests/:id', async (req, res) => {
+    const { is_completed } = req.body;
+    const questId = req.params.id;
 
-    const [rows] = await db.execute(
-        "SELECT id, username, current_level, total_xp FROM users WHERE id = ?",
-        [userId]
-    );
+    try {
+        // get quest details first so we know who gets the XP and how hard it was
+        const [questRows] = await db.query(`SELECT user_id, difficulty FROM quests WHERE id = ?`, [questId]);
+        if (questRows.length === 0) return res.status(404).json({ success: false, message: "Quest not found" });
+        
+        const quest = questRows[0];
 
-    const user = rows[0];
+        // determine exp based on difficulty
+        // easy = 10, medium = 25, hard = 50, expert = 100
+        let xpValue = 10;
+        if (quest.difficulty === 'Medium') xpValue = 25;
+        if (quest.difficulty === 'Hard') xpValue = 50;
+        if (quest.difficulty === 'Expert') xpValue = 100;
 
-    res.render("stats", {
-        appName: "The Quest of Life",
-        user,
-        userId,  // ✔ add this
-        playerLevel: user.current_level,
-        playerXp: user.total_xp
-    });
+        // if checking the box, add XP ... if unchecking, subtract XP
+        const xpDelta = is_completed === 1 ? xpValue : -xpValue;
+
+        // update the quest status
+        await db.query(`UPDATE quests SET is_completed = ? WHERE id = ?`, [is_completed, questId]);
+
+        // update the user's XP and Level (GREATEST(0) prevents negative XP)
+        // level goes up by 1 for every 100 XP they earn (100 exp per level)
+        await db.query(`
+            UPDATE users 
+            SET total_xp = GREATEST(0, total_xp + ?),
+                current_level = FLOOR(GREATEST(0, total_xp + ?) / 100)
+            WHERE id = ?
+        `, [xpDelta, xpDelta, quest.user_id]);
+
+        // fetch the newly calculated stats
+        const [userRows] = await db.query(`SELECT current_level, total_xp FROM users WHERE id = ?`, [quest.user_id]);
+
+        // send the new stats back to the frontend
+        res.json({
+            success: true,
+            newLevel: userRows[0].current_level,
+            newXp: userRows[0].total_xp
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: "Failed to update quest and XP" });
+    }
 });
-
 
 module.exports = router;

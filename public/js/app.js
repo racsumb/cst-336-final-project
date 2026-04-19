@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    userId,
+                    user_id: userId,
                     sleep_hours,
                     workout_time,
                     mood
@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
         loadDailyQuote();
         // loadRandomBackground();
         // TODO: Validate / Deal with Forms
-
+        loadQuests();
         const statsBtn = document.getElementById('view-stats-btn');
             if (statsBtn) {
                 statsBtn.addEventListener('click', () => {
@@ -208,17 +208,120 @@ async function loadStatsHistory() {
     const container = document.getElementById('stats-history');
     if (!container) return;
 
-    const userId = document.getElementById('user-id').value;
-    const response = await fetch(`/api/stats/history/${userId}`);
-    const history = await response.json();
+    // grab the user ID reliably from localStorage, not the DOM
+    const userId = localStorage.getItem('userId');
+    
+    if (!userId) return;
 
-    container.innerHTML = history.map(entry => `
-        <div class="stats-card">
-            <h3>${entry.log_date}</h3>
-            <p><strong>Sleep:</strong> ${entry.sleep_hours} hrs</p>
-            <p><strong>Workout:</strong> ${entry.workout_time} min</p>
-            <p><strong>Mood:</strong> ${entry.mood}</p>
-        </div>
-    `).join('');
+    try {
+        const response = await fetch(`/api/stats/history/${userId}`);
+        const history = await response.json();
+
+        // handle the case where they haven't logged anything yet
+        if (history.length === 0) {
+            container.innerHTML = '<p style="color: #8b9eb7; font-style: italic;">No daily stats recorded yet.</p>';
+            return;
+        }
+
+        // map over the data and build the HTML
+        container.innerHTML = history.map(entry => {
+            // generate a clean date
+            const cleanDate = entry.log_date.split('T')[0];
+            return `
+                <div class="stats-card" style="background-color: #121418; border: 1px solid #2c313c; padding: 1.5rem; margin-bottom: 1rem; border-radius: 4px;">
+                    <h4 style="color: #d4af37; margin-top: 0; margin-bottom: 1rem;">${cleanDate}</h4>
+                    <p style="color: #d4af37; margin: 0.5rem 0;"><strong>Sleep:</strong> ${entry.sleep_hours} hours</p>
+                    <p style="color: #d4af37; margin: 0.5rem 0;"><strong>Workout:</strong> ${entry.workout_time} minutes</p>
+                    <p style="color: #d4af37; margin: 0.5rem 0;"><strong>Mood:</strong> ${entry.mood}</p>
+                </div>
+            `;
+        }).join('');
+        
+    } catch (error) {
+        console.error("Failed to load history:", error);
+        container.innerHTML = '<p style="color: #ff4c4c;">Failed to load stats history from the server.</p>';
+    }
 }
 
+async function loadQuests() {
+    const questList = document.getElementById('quest-list');
+    const userId = localStorage.getItem('userId');
+
+    if (!questList || !userId) return;
+
+    try {
+        // fetch the user's specific quests from the database
+        const response = await fetch(`/api/quests/${userId}`);
+        const quests = await response.json();
+
+        // clear out the "Loading..." text
+        questList.innerHTML = ''; 
+
+        //handle the empty state if they have no quests
+        if (quests.length === 0) {
+            questList.innerHTML = '<p style="color: #8b9eb7; font-style: italic;">Your quest log is empty. Add a new quest below!</p>';
+            return;
+        }
+
+        // loop through the data and build the HTML
+        quests.forEach(quest => {
+            const questDiv = document.createElement('div');
+            questDiv.className = 'quest-item';
+            
+            // booleans come back as 1 (true) or 0 (false)
+            const isChecked = quest.is_completed === 1 ? 'checked' : '';
+            
+            questDiv.innerHTML = `
+                <label style="${quest.is_completed === 1 ? 'text-decoration: line-through; color: #8b9eb7;' : ''}">
+                    <input type="checkbox" data-id="${quest.id}" ${isChecked}> 
+                    ${quest.quest_title} (${quest.difficulty})
+                </label>
+            `;
+
+            // attach the event listener to the checkbox we just created
+            const checkbox = questDiv.querySelector('input');
+            checkbox.addEventListener('change', async (e) => {
+                const questId = e.target.getAttribute('data-id');
+                // convert the checkbox state into MySQL boolean format (1 or 0)
+                const isCompleted = e.target.checked ? 1 : 0; 
+
+                try {
+                    // send the PUT request to update the database
+                    const updateResponse = await fetch(`/api/quests/${questId}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ is_completed: isCompleted })
+                    });
+                    
+                    const data = await updateResponse.json();
+
+                    // if the backend successfully updated the XP, update the header!
+                    if (data.success) {
+                        const levelDisplay = document.getElementById('player-level-display');
+                        const xpDisplay = document.getElementById('player-xp-display');
+                        
+                        if (levelDisplay && xpDisplay) {
+                            levelDisplay.textContent = `Level ${data.newLevel}`;
+                            // Make the JS match the EJS template math!
+                            xpDisplay.textContent = `XP: ${data.newXp}/${(data.newLevel + 1) * 100}`;
+                        }
+                    }
+                    
+                    // reload the quests to update the strikethrough styling
+                    loadQuests(); 
+                } catch (err) {
+                    console.error("Failed to update quest status", err);
+                    alert("The magic faded. Could not update quest.");
+                    e.target.checked = !e.target.checked; // Revert the visual check if DB fails
+                }
+            });
+
+            // inject quest into the page
+            questList.appendChild(questDiv);
+        });
+
+    } catch (error) {
+        console.error("Error loading quests:", error);
+        questList.innerHTML = '<p style="color: #ff4c4c;">Failed to load quests from the server.</p>';
+    }
+}
