@@ -46,6 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const randomWorkoutBtn = document.getElementById('random-workout-btn');
     const addQuestBtn = document.getElementById('add-quest-btn');
     const questList = document.getElementById('quest-list');
+    let questIdToDelete = null; // Global variable so functions can pass questId
 
     const currentPath = window.location.pathname;
     const loggedInUserId = localStorage.getItem('userId');
@@ -319,29 +320,11 @@ async function loadQuests() {
             // Attach event listener to the qust deletion button
             const deleteBtn = questDiv.querySelector('.delete-quest-btn');
             deleteBtn.addEventListener('click', async (e) => {
-                const questId = e.target.getAttribute('data-id');
-                
-                // The Confirmation Prompt
-                const confirmed = confirm("Are you sure you want to incinerate this quest?");
-                
-                if (confirmed) {
-                    try {
-                        const response = await fetch(`/api/quests/${questId}`, {
-                            method: 'DELETE'
-                        });
-
-                        const result = await response.json();
-
-                        if (result.success) {
-                            loadQuests(); // Refresh the quest list after removing quest
-                        } else {
-                            alert("The quest resisted destruction: " + result.message);
-                        }
-                    } catch (err) {
-                        console.error("Failed to delete quest:", err);
-                        alert("A magical interference prevented the deletion.");
-                    }
-                }
+                questIdToDelete = e.target.getAttribute('data-id');
+                const deleteModal = document.getElementById('delete-quest-modal');
+                if (deleteModal) {
+                    deleteModal.style.display = 'flex';
+                }                
             });
 
             // inject quest into the page
@@ -355,10 +338,17 @@ async function loadQuests() {
 }
 
 function initQuestModal() {
+    // Quest addition constants
     const questModal = document.getElementById('quest-modal');
     const openBtn = document.getElementById('add-quest-btn');
     const closeBtn = document.getElementById('close-modal');
     const questForm = document.getElementById('new-quest-form');
+
+    // Quest deletion constants
+    const deleteModal = document.getElementById('delete-quest-modal');
+    const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+    const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
+
 
     // Early exit if buttons do not exist
     if (!questModal || !openBtn || !questForm) {
@@ -380,6 +370,14 @@ function initQuestModal() {
             questModal.style.display = 'none';
         }
     });
+
+    // Resets cancellation and deletion modal if users cancels
+    if (cancelDeleteBtn && deleteModal) {
+        cancelDeleteBtn.onclick = () => {
+            deleteModal.style.display = 'none';
+            questIdToDelete = null;
+        }
+    }
 
     // Form Submission
     questForm.addEventListener('submit', async (e) => {
@@ -414,4 +412,28 @@ function initQuestModal() {
             alert("A scroll error occurred. Check the console.");
         }
     });
+
+
+    if(confirmDeleteBtn) {
+        confirmDeleteBtn.addEventListener('click', async () => {
+            if (!questIdToDelete) return;
+    
+            try {
+                const response = await fetch(`/api/quests/${questIdToDelete}`, {
+                    method: 'DELETE'
+                });
+    
+                const result = await response.json();
+    
+                if (result.success) {
+                    deleteModal.style.display = 'none';
+                    questIdToDelete = null;
+                    loadQuests(); // Refresh the list after deleting
+                }
+            } catch (err) {
+                console.error("Failed to delete quest:", err);
+            }
+        });
+    }
+    
 }
