@@ -8,41 +8,42 @@ document.addEventListener('DOMContentLoaded', () => {
     const statsForm = document.getElementById('stats-form');
 
     if (statsForm) {
-    statsForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
+        statsForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
 
-        const userId = document.getElementById('user-id').value;
+            const userId = document.getElementById('user-id').value;
 
 
-        const sleep_hours = document.getElementById('sleep-input').value;
-        const workout_time = document.getElementById('workout-input').value;
-        const mood = document.getElementById('mood-input').value;
+            const sleep_hours = document.getElementById('sleep-input').value;
+            const workout_time = document.getElementById('workout-input').value;
+            const mood = document.getElementById('mood-input').value;
 
-        try {
-            const response = await fetch('/api/stats', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    user_id: userId,
-                    sleep_hours,
-                    workout_time,
-                    mood
-                })
-            });
+            try {
+                const response = await fetch('/api/stats', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_id: userId,
+                        sleep_hours,
+                        workout_time,
+                        mood
+                    })
+                });
 
-            const result = await response.json();
+                const result = await response.json();
 
-            if (result.success) {
-                alert("Stats updated!");
-            } else {
-                alert("Failed to update stats.");
+                if (result.success) {
+                    showToast("⚔️ Chronicles Updated: Stats Logged!");
+                    statsForm.reset(); // Clears form after successful addition
+                } else {
+                    showToast(" Failed to log stats.", "error");
+                }
+            } catch (err) {
+                console.error("Error saving stats:", err);
+                showToast("A magical disturbance prevented saving your stats", "error");
             }
-        } catch (err) {
-            console.error("Error saving stats:", err);
-            alert("Something went wrong saving your stats.");
-        }
-    });
-}
+        });
+    }
     const randomWorkoutBtn = document.getElementById('random-workout-btn');
     const addQuestBtn = document.getElementById('add-quest-btn');
     const questList = document.getElementById('quest-list');
@@ -85,8 +86,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
     } else if (currentPath === '/stats') {
-    loadStatsHistory();
-}
+        loadStatsHistory();
+    }
 
     
 });
@@ -373,10 +374,10 @@ function initQuestModal() {
 
     // Resets cancellation and deletion modal if users cancels
     if (cancelDeleteBtn && deleteModal) {
-        cancelDeleteBtn.onclick = () => {
+        cancelDeleteBtn.addEventListener('click', () => {
             deleteModal.style.display = 'none';
             questIdToDelete = null;
-        }
+        });
     }
 
     // Form Submission
@@ -436,4 +437,25 @@ function initQuestModal() {
         });
     }
     
+}
+
+function showToast(message, type = 'success') {
+    const container = document.getElementById('toast-container');
+
+    if (!container) {
+        return;
+    }
+
+    // Create the toast element
+    const toast = document.createElement('div');
+    toast.className = `toast-msg toast-${type}`;
+    toast.innerHTML = message;
+
+    // Add to container
+    container.appendChild(toast);
+
+    // Remove after animation finishes
+    setTimeout(() => {
+        toast.remove();
+    }, 3000);
 }

@@ -6,10 +6,13 @@
             <span id="player-level-display">Level <%= playerLevel %></span> | 
             <span id="player-xp-display">XP: <%= playerXp %>/<%= (playerLevel + 1) * 100 %></span>
         </div>
+        
+        <nav>
+            Logged in as: <b><%= user.username %></b>
+            <button id="logout-btn">Logout</button>
+        </nav>
     <% } %>
 
-    <nav>
-        Logged in as: <b><%= user.username %></b>
-        <button id="logout-btn">Logout</button>
-    </nav>
 </header>
+
+<div id="toast-container" class="toast-container"></div>

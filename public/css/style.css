@@ -234,3 +234,57 @@ button:active {
     justify-content: flex-end;
     margin-top: 1rem;
 }
+
+.toast-container {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    pointer-events: none;
+}
+
+.toast-msg {
+    background-color: rgba(244, 232, 193, 0.95);
+    color: #2c2c2c;
+    border: 4px double #8b7355;
+    padding: 1rem 2rem;
+    border-radius: 4px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    margin-bottom: 10px;
+    font-weight: bold;
+    text-align: center;
+    min-width: 250px;
+    animation: slideUp 0.4s ease-out, fadeOut 0.5s 2.5s forwards;
+}
+
+.toast-success {
+    color: #1b4d2e; 
+    border-color: #1b4d2e;
+}
+
+.toast-error {
+    color: #8b0000; 
+    border-color: #8b0000;
+}
+
+/* Animation keyframes for toast popup */
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
