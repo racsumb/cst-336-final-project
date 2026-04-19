@@ -333,6 +333,26 @@ router.get('/stats/history/:userId', async (req, res) => {
     }
 });
 
+router.post('/stats', async (req, res) => {
+    const { userId, sleep_hours, workout_time, mood } = req.body;
+
+    try {
+        await db.query(
+            `INSERT INTO daily_stats (user_id, log_date, sleep_hours, workout_time, mood)
+             VALUES (?, CURDATE(), ?, ?, ?)`,
+            [userId, sleep_hours, workout_time, mood]
+        );
+
+        res.json({ success: true });
+
+    } catch (error) {
+        console.error("🔥 MySQL INSERT ERROR:", error);   // <‑‑ ADD THIS
+        res.status(500).json({ success: false, message: "Failed to save stats" });
+    }
+});
+
+
+
 
 // ===============================
 // GET RANDOM QUOTE
@@ -380,6 +400,25 @@ router.get("/background", async (req, res) => {
   }
 });
 
+router.get('/stats', async (req, res) => {
+    const userId = req.query.userId;
+    if (!userId) return res.redirect('/');
+
+    const [rows] = await db.execute(
+        "SELECT id, username, current_level, total_xp FROM users WHERE id = ?",
+        [userId]
+    );
+
+    const user = rows[0];
+
+    res.render("stats", {
+        appName: "The Quest of Life",
+        user,
+        userId,  // ✔ add this
+        playerLevel: user.current_level,
+        playerXp: user.total_xp
+    });
+});
 
 
 module.exports = router;

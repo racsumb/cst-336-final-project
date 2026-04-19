@@ -14,48 +14,28 @@ router.get('/register', (req, res) => {
 
 // route for our main dashboard
 router.get('/quests', async (req, res) => {
-    try {
-        const userId = req.query.userId;
-
-        if (!userId) {
-            console.log("No userId provided, redirecting to login");
-            return res.redirect('/');
-        }
-
-        const [rows] = await db.execute(
-            `SELECT current_level, total_xp FROM users WHERE id = ?`,
-            [userId]
-        );
-
-        const user = rows[0];
-
-        if (!user) {
-            console.log("User not found in DB");
-            return res.render('index', {
-                appName: 'The Quest of Life',
-                playerLevel: 1,
-                playerXp: 0
-            });
-        }
-
-        res.render('index', { 
-            appName: 'The Quest of Life',
-            playerLevel: user.current_level,
-            playerXp: user.total_xp
-        });
-
-    } catch (err) {
-        console.error("Error in /quests route:", err);
-        res.status(500).send("Something went wrong loading your dashboard.");
-    }
-});
-
-router.get('/stats', (req, res) => {
     const userId = req.query.userId;
     if (!userId) return res.redirect('/');
-    res.render('stats', { userId });
+
+    const [rows] = await db.execute(
+        "SELECT id, username, current_level, total_xp FROM users WHERE id = ?",
+        [userId]
+    );
+
+    const user = rows[0];
+
+    console.log("User loaded for /quests:", user);
+
+    res.render("index", {
+        appName: "The Quest of Life",
+        user,
+        userId,
+        playerLevel: user.current_level,
+        playerXp: user.total_xp
+    });
+    
+
+
 });
-
-
 
 module.exports = router;

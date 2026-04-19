@@ -6,6 +6,43 @@ document.addEventListener('DOMContentLoaded', () => {
     // Target DOM elements
     const quoteElement = document.getElementById('daily-quote');
     const statsForm = document.getElementById('stats-form');
+
+    if (statsForm) {
+    statsForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const userId = document.getElementById('user-id').value;
+
+
+        const sleep_hours = document.getElementById('sleep-input').value;
+        const workout_time = document.getElementById('workout-input').value;
+        const mood = document.getElementById('mood-input').value;
+
+        try {
+            const response = await fetch('/api/stats', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    userId,
+                    sleep_hours,
+                    workout_time,
+                    mood
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                alert("Stats updated!");
+            } else {
+                alert("Failed to update stats.");
+            }
+        } catch (err) {
+            console.error("Error saving stats:", err);
+            alert("Something went wrong saving your stats.");
+        }
+    });
+}
     const randomWorkoutBtn = document.getElementById('random-workout-btn');
     const addQuestBtn = document.getElementById('add-quest-btn');
     const questList = document.getElementById('quest-list');
@@ -171,7 +208,7 @@ async function loadStatsHistory() {
     const container = document.getElementById('stats-history');
     if (!container) return;
 
-    const userId = localStorage.getItem('userId');
+    const userId = document.getElementById('user-id').value;
     const response = await fetch(`/api/stats/history/${userId}`);
     const history = await response.json();
 
@@ -184,3 +221,4 @@ async function loadStatsHistory() {
         </div>
     `).join('');
 }
+

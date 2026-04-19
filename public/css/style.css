@@ -11,15 +11,24 @@ body {
     background-color: #121418;    
 }
 
-h1, h2, h3 {
+h1, h2, h3, .home-link a {
     color: #d4af37;
     margin-top: 0;
     font-weight: normal;
     letter-spacing: 1px;
+   
+}
+
+#home-link {
+    text-decoration: none;
+}
+
+b {
+    font-weight: 1000;
 }
 
 header {
-    background-color: #0b0c10;
+    background-color: rgb(80, 80, 80);
     border-bottom: 2px solid #d4af37;
     padding: 1rem 2rem;
     display: flex;

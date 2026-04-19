@@ -1,0 +1,14 @@
+<header class="main-header">
+    <a href="/" id="home-link"><h1>Quest of Life</h1></a>
+
+    <% if (typeof user !== "undefined" && user) { %>
+
+        <div>Level <%= playerLevel %> | XP: <%= playerXp %>/1000</div>
+
+    <% } %>
+
+    <nav>
+        Logged in as: <b><%= user.username %></b>
+        <button id="logout-btn">Logout</button>
+    </nav>
+</header>
