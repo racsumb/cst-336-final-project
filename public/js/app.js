@@ -73,7 +73,6 @@ document.addEventListener('DOMContentLoaded', () => {
         initLogout();
         loadDailyQuote();
         // loadRandomBackground();
-        // TODO: Validate / Deal with Forms
         loadQuests();
         initQuestModal();
         const statsBtn = document.getElementById('view-stats-btn');
@@ -377,8 +376,7 @@ function initQuestModal() {
             if (result.success) {
                 questModal.style.display = 'none';
                 questForm.reset();
-                // Refresh the quest list immediately after adding a new quest
-                loadQuests(); 
+                loadQuests(); // Refresh the quest list immediately after adding a new quest
             } else {
                 alert("The quest log rejected your entry: " + result.message);
             }

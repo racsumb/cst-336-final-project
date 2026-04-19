@@ -209,7 +209,6 @@ button:active {
 .modal-content select {
     width: 100%;
     padding: 0.75rem;
-    margin-bottom: 1.5rem;
     border-radius: 4px;
     background-color: rgba(244, 232, 193);
     font-family: inherit;
