@@ -424,6 +424,14 @@ async function openStatsModal() {
     try {
         const response = await fetch(`/api/stats/summary/${userId}`);
         const data = await response.json();
+
+        // DEBUG TEXT TO TEST SCROLLING IN MODAL WINDOW. REMOVE BEFORE SUBMISSION
+        // data.history = Array.from({ length: 30 }, (_, i) => ({
+        //     formattedDate: `Monday, Apr ${30 - i}`,
+        //     sleep_hours: (Math.random() * 3 + 6).toFixed(1),
+        //     workout_time: Math.floor(Math.random() * 60),
+        //     mood: "Testing the Scroll!"
+        // }));
         
         let username = localStorage.getItem('username');
         // If the local storage doesn't contain the username, set value from DB

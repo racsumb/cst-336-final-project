@@ -323,6 +323,9 @@ button:active {
     font-family: 'Georgia', serif;
     position: sticky;
     top: 0;
+    z-index: 2;
+    background-color: #f4e8c1;
+    padding: 10px 5px;
     color: #5d3f6a;
     text-transform: uppercase;
     font-size: 0.85rem;
