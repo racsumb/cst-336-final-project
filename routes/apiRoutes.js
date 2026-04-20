@@ -307,10 +307,12 @@ router.get('/stats/history/:userId', async (req, res) => {
 });
 
 // ===============================
-// TEST SINGLE ENDPOING TO GET STATS INFORMATION FOR A USER
+// GET STATS SUMMARY FOR A USER
 // ===============================
 router.get('/stats/summary/:userId', async (req, res) => {
+
     const userId = req.params.userId;
+
     try {
 
         // Verify the username
@@ -318,29 +320,33 @@ router.get('/stats/summary/:userId', async (req, res) => {
             `SELECT username FROM users WHERE id = ?`,
             [userId]
         );
+        
         const username = userRows[0]?.username || "Hero";
 
-        // Get today's stats
-        const [todayRows] = await db.query(
-            `SELECT * FROM daily_stats WHERE user_id = ? AND log_date = CURDATE()`,
-            [userId]
-        );
+        const [ [todayRows], [avgRows], [historyRows] ] = await Promise.all([
 
-        // Calculate averages for the last 7 days
-        const [avgRows] = await db.query(
+            // Get today's stats
+            db.query(
+            `SELECT *
+             FROM daily_stats
+             WHERE user_id = ? AND log_date = CURDATE()`,
+            [userId]),
+
+            // Calculates averages for last 7 days
+            db.query(
             `SELECT AVG(sleep_hours) as avgSleep, AVG(workout_time) as avgWork
              FROM daily_stats 
              WHERE user_id = ? AND log_date >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)`,
-            [userId]
-        );
+            [userId]),
 
-        // Get raw history for last 7 days
-        const [historyRows] = await db.query(
+            // Retrieves 30 day stat history
+            db.query(
             `SELECT DATE_FORMAT(log_date, '%W, %b %d') as formattedDate, sleep_hours, workout_time, mood
              FROM daily_stats WHERE user_id = ? 
-             ORDER BY log_date DESC LIMIT 7`,
-            [userId]
-        );
+             ORDER BY log_date DESC LIMIT 30`,
+            [userId])
+
+        ]);
 
         res.json({
             username: username,
@@ -348,6 +354,7 @@ router.get('/stats/summary/:userId', async (req, res) => {
             averages: avgRows[0],
             history: historyRows
         });
+
     } catch (error) {
         res.status(500).json({ success: false, message: "Error fetching summary" });
     }

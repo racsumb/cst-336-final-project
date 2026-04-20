@@ -478,13 +478,13 @@ async function openStatsModal() {
     // Update Today's Banner
     const todayDetails = document.getElementById('today-details');
     if (data.today) {
-        todayDetails.innerHTML = `Sleep: <b>${data.today.sleep_hours}h</b> | Training: <b>${data.today.workout_time}m</b> | Mood: <i>"${data.today.mood}"</i>`;
+        todayDetails.innerHTML = `Sleep: <b>${data.today.sleep_hours}h</b> | Workout: <b>${data.today.workout_time}m</b> | Mood: <i>"${data.today.mood}"</i>`;
     } else {
         todayDetails.innerHTML = "No stats recorded for today yet, Hero!";
     }
 
     // Update 7-Day Averages
-    document.getElementById('sleep-avg-display').innerText = `${Number(data.averages.avgSleep || 0).toFixed(1)}h`;
+    document.getElementById('sleep-avg-display').innerText = `${Number(data.averages.avgSleep || 0).toFixed(2)}h`;
     document.getElementById('work-avg-display').innerText = `${Math.round(data.averages.avgWork || 0)}m`;
 
     // Update History Table
