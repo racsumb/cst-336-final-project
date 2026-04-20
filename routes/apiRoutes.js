@@ -377,14 +377,20 @@ router.put('/quests/:id', async (req, res) => {
         // update the quest status
         await db.query(`UPDATE quests SET is_completed = ? WHERE id = ?`, [is_completed, questId]);
 
-        // update the user's XP and Level (GREATEST(0) prevents negative XP)
+        // Update users XP (GREATEST(0) prevents negative XP)
+        await db.query(`
+            UPDATE users 
+            SET total_xp = GREATEST(0, total_xp + ?)
+            WHERE id = ?
+        `, [xpDelta, quest.user_id]);
+
+        // Update users level based on updated XP values
         // level goes up by 1 for every 100 XP they earn (100 exp per level)
         await db.query(`
             UPDATE users 
-            SET total_xp = GREATEST(0, total_xp + ?),
-                current_level = FLOOR(GREATEST(0, total_xp + ?) / 100)
+            SET current_level = FLOOR(GREATEST(0, total_xp) / 100)
             WHERE id = ?
-        `, [xpDelta, xpDelta, quest.user_id]);
+        `, [quest.user_id]);
 
         // fetch the newly calculated stats
         const [userRows] = await db.query(`SELECT current_level, total_xp FROM users WHERE id = ?`, [quest.user_id]);
