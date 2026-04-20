@@ -80,16 +80,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const statsBtn = document.getElementById('view-stats-btn');
             if (statsBtn) {
                 statsBtn.addEventListener('click', (e) => {
-                    // const userId = localStorage.getItem('userId');
-                    // window.location.href = `/stats?userId=${userId}`;
                     e.preventDefault();
                     openStatsModal();
                 });
             }
             
-    } else if (currentPath === '/stats') {
-        loadStatsHistory();
-    }    
+    }  
 });
 
 function initLogin() {
@@ -204,45 +200,6 @@ async function loadRandomBackground() {
   } catch (err) {
     console.error("Background fetch failed:", err);
   }
-}
-
-async function loadStatsHistory() {
-    const container = document.getElementById('stats-history');
-    if (!container) return;
-
-    // grab the user ID reliably from localStorage, not the DOM
-    const userId = localStorage.getItem('userId');
-    
-    if (!userId) return;
-
-    try {
-        const response = await fetch(`/api/stats/history/${userId}`);
-        const history = await response.json();
-
-        // handle the case where they haven't logged anything yet
-        if (history.length === 0) {
-            container.innerHTML = '<p style="color: #8b9eb7; font-style: italic;">No daily stats recorded yet.</p>';
-            return;
-        }
-
-        // map over the data and build the HTML
-        container.innerHTML = history.map(entry => {
-            // generate a clean date
-            const cleanDate = entry.log_date.split('T')[0];
-            return `
-                <div class="stats-card" style="background-color: #121418; border: 1px solid #2c313c; padding: 1.5rem; margin-bottom: 1rem; border-radius: 4px;">
-                    <h4 style="color: #d4af37; margin-top: 0; margin-bottom: 1rem;">${cleanDate}</h4>
-                    <p style="color: #d4af37; margin: 0.5rem 0;"><strong>Sleep:</strong> ${entry.sleep_hours} hours</p>
-                    <p style="color: #d4af37; margin: 0.5rem 0;"><strong>Workout:</strong> ${entry.workout_time} minutes</p>
-                    <p style="color: #d4af37; margin: 0.5rem 0;"><strong>Mood:</strong> ${entry.mood}</p>
-                </div>
-            `;
-        }).join('');
-        
-    } catch (error) {
-        console.error("Failed to load history:", error);
-        container.innerHTML = '<p style="color: #ff4c4c;">Failed to load stats history from the server.</p>';
-    }
 }
 
 async function loadQuests() {
