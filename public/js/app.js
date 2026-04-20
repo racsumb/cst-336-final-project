@@ -79,17 +79,17 @@ document.addEventListener('DOMContentLoaded', () => {
         initQuestModal();
         const statsBtn = document.getElementById('view-stats-btn');
             if (statsBtn) {
-                statsBtn.addEventListener('click', () => {
-                    const userId = localStorage.getItem('userId');
-                    window.location.href = `/stats?userId=${userId}`;
+                statsBtn.addEventListener('click', (e) => {
+                    // const userId = localStorage.getItem('userId');
+                    // window.location.href = `/stats?userId=${userId}`;
+                    e.preventDefault();
+                    openStatsModal();
                 });
             }
             
     } else if (currentPath === '/stats') {
         loadStatsHistory();
-    }
-
-    
+    }    
 });
 
 function initLogin() {
@@ -116,6 +116,7 @@ function initLogin() {
             if (result.success) {
                 // save the user ID to web storage
                 localStorage.setItem('userId', result.userId);
+                localStorage.setItem('username', result.username);
                 // redirect to the dashboard
                 window.location.href = `/quests?userId=${result.userId}`;
             } else {
@@ -458,4 +459,48 @@ function showToast(message, type = 'success') {
     setTimeout(() => {
         toast.remove();
     }, 3000);
+}
+
+async function openStatsModal() {
+    const userId = localStorage.getItem('userId'); // Get ID from storage
+    
+    const response = await fetch(`/api/stats/summary/${userId}`);
+    const data = await response.json();
+    
+    let username = localStorage.getItem('username');
+    // If the local storage doesn't contain the username, set value from DB
+    if (!username && data.username) {
+        localStorage.setItem('username', data.username);
+        username = data.username;
+    }
+    document.getElementById('stat-sheet-title').innerText = `${username}'s Stat Sheet`;
+
+    // Update Today's Banner
+    const todayDetails = document.getElementById('today-details');
+    if (data.today) {
+        todayDetails.innerHTML = `Sleep: <b>${data.today.sleep_hours}h</b> | Training: <b>${data.today.workout_time}m</b> | Mood: <i>"${data.today.mood}"</i>`;
+    } else {
+        todayDetails.innerHTML = "No stats recorded for today yet, Hero!";
+    }
+
+    // Update 7-Day Averages
+    document.getElementById('sleep-avg-display').innerText = `${Number(data.averages.avgSleep || 0).toFixed(1)}h`;
+    document.getElementById('work-avg-display').innerText = `${Math.round(data.averages.avgWork || 0)}m`;
+
+    // Update History Table
+    const tableBody = document.getElementById('history-table-body');
+    tableBody.innerHTML = data.history.map(row => `
+        <tr>
+            <td>${row.formattedDate}</td>
+            <td>${row.sleep_hours}h</td>
+            <td>${row.workout_time}m</td>
+            <td>${row.mood || '—'}</td>
+        </tr>
+    `).join('');
+
+    document.getElementById('statsModal').style.display = 'flex';
+}
+
+function closeStatsModal() {
+    document.getElementById('statsModal').style.display = 'none';
 }

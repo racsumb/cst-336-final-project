@@ -19,7 +19,7 @@
 
     <main class="container">
         <section class="panel">
-            <h3>📊 Hero Stats</h3>
+            <h3>📊 <span>Hero Stats</span></h3>
             <form id="stats-form">
                 <input type="hidden" id="user-id" value="<%= userId %>">
 
@@ -39,13 +39,13 @@
                 </div>
 
                 <button type="submit" id="update-stats-btn">Update Stats</button>
-                <button id="view-stats-btn">View Stats History</button>
+                <button type="button" id="view-stats-btn">View Stats History</button>
             </form>
 
         </section>
 
         <section class="panel">
-            <h3>📜 Active Quests</h3>
+            <h3>📜 <span>Active Quests</span></h3>
             
             <div id="quest-list">
                 <p style="color: #8b9eb7;">Loading your quests...</p>
@@ -98,6 +98,48 @@
             <div class="modal-actions" style="justify-content: center;">
                 <button id="confirm-delete-btn" class="cancel-btn">Yes, Burn it</button>
                 <button id="cancel-delete-btn" class="accept-btn">No, Keep it</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="statsModal" class="modal-overlay">
+        <div class="modal-content stats-large">
+            <div class="panel">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h3 id="stat-sheet-title">Stat Sheet</h3>
+                    <button onclick="closeStatsModal()" class="close-modal-btn">❌</button>
+                </div>
+
+                <div id="today-banner" class="quote-banner" style="margin: 1rem 0; border-radius: 4px;">
+                    <h3 id="today-title">Today's Entry</h3>
+                    <p id="today-details">Loading today's effort...</p>
+                </div>
+
+                <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                    <div class="trend-card-full">
+                        <small>7-Day Sleep Avg</small>
+                        <b id="sleep-avg-display">0h</b>
+                    </div>
+                    <div class="trend-card-full">
+                        <small>7-Day Workout Avg</small>
+                        <b id="work-avg-display">0m</b>
+                    </div>
+                </div>
+
+                <div style="max-height: 250px; overflow-y: auto;">
+                    <table class="stats-table" style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="border-bottom: 2px solid #8b7355;">
+                                <th>Date</th>
+                                <th>Sleep</th>
+                                <th>Workout</th>
+                                <th>Mood</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-table-body">
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>

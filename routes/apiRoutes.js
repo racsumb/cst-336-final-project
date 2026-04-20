@@ -26,7 +26,8 @@ router.post('/login', async (req, res) => {
             res.json({
                 success: true,
                 message: "Logged in",
-                userId: user.id
+                userId: user.id,
+                username: user.username
             });
         } else {
             res.status(401).json({
@@ -194,6 +195,7 @@ router.get('/stats/:userId', async (req, res) => {
     const userId = req.params.userId;
 
     try {
+        
         // I get the user's daily stats for today
         const [rows] = await db.query(
             `SELECT * FROM daily_stats
@@ -301,6 +303,53 @@ router.get('/stats/history/:userId', async (req, res) => {
             success: false,
             message: "Failed to fetch stats history"
         });
+    }
+});
+
+// ===============================
+// TEST SINGLE ENDPOING TO GET STATS INFORMATION FOR A USER
+// ===============================
+router.get('/stats/summary/:userId', async (req, res) => {
+    const userId = req.params.userId;
+    try {
+
+        // Verify the username
+        const [userRows] = await db.query(
+            `SELECT username FROM users WHERE id = ?`,
+            [userId]
+        );
+        const username = userRows[0]?.username || "Hero";
+
+        // Get today's stats
+        const [todayRows] = await db.query(
+            `SELECT * FROM daily_stats WHERE user_id = ? AND log_date = CURDATE()`,
+            [userId]
+        );
+
+        // Calculate averages for the last 7 days
+        const [avgRows] = await db.query(
+            `SELECT AVG(sleep_hours) as avgSleep, AVG(workout_time) as avgWork
+             FROM daily_stats 
+             WHERE user_id = ? AND log_date >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)`,
+            [userId]
+        );
+
+        // Get raw history for last 7 days
+        const [historyRows] = await db.query(
+            `SELECT DATE_FORMAT(log_date, '%W, %b %d') as formattedDate, sleep_hours, workout_time, mood
+             FROM daily_stats WHERE user_id = ? 
+             ORDER BY log_date DESC LIMIT 7`,
+            [userId]
+        );
+
+        res.json({
+            username: username,
+            today: todayRows[0] || null,
+            averages: avgRows[0],
+            history: historyRows
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Error fetching summary" });
     }
 });
 

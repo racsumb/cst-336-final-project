@@ -64,9 +64,13 @@ header h2 {
 
 .quote-banner h3, .panel h3 {
     color: #2c2c2c;
-    font-style: italic;
+    font-style: normal;
     margin: 0;
     font-family: 'Georgia', serif;
+}
+
+.quote-banner h3 span, .panel h3 span {
+    font-style: italic;
 }
 
 .panel {
@@ -85,7 +89,7 @@ header h2 {
 .form-group label {
     display: block;
     margin-bottom: 0.5rem;
-    /* color: #8b9eb7; */
+    color: black;
 }
 
 input[type="text"],
@@ -138,7 +142,7 @@ input[type="checkbox"] {
     background-color: rgba(0, 0, 0, 0.4);
 }
 
-.delete-quest-btn {
+.delete-quest-btn, .close-modal-btn {
     background: none;
     border: none;
     cursor: pointer;
@@ -148,7 +152,7 @@ input[type="checkbox"] {
     transition: transform 0.2s ease;
 }
 
-.delete-quest-btn:hover {
+.delete-quest-btn:hover, .close-modal-btn:hover {
     transform: scale(1.3);
     background: none;
 }
@@ -287,4 +291,30 @@ button:active {
     to {
         opacity: 0;
     }
+}
+
+.modal-content.stats-large {
+    max-width: 600px;
+    width: 95%;
+    padding: 1.5rem;
+}
+
+.trend-card-full {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem;
+    background-color: rgba(244, 232, 193, 0.5);
+    color: #2c2c2c;
+    border: 2px solid #8b7355;
+    border-radius: 6px;
+    box-shadow: inset 0 0 10px rgba(139, 115, 85, 0.1);
+}
+
+.stats-table td {
+    padding: 0.75rem 0.5rem;
+    border-bottom: 1px solid rgba(139, 115, 85, 0.2);
+    word-break: break-word;
+    max-width: 200px;
 }
