@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     showToast("⚔️ Chronicles Updated: Stats Logged!");
                     statsForm.reset(); // Clears form after successful addition
                 } else {
-                    showToast(" Failed to log stats.", "error");
+                    showToast("Failed to log stats.", "error");
                 }
             } catch (err) {
                 console.error("Error saving stats:", err);
