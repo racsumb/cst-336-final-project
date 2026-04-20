@@ -421,41 +421,46 @@ function showToast(message, type = 'success') {
 async function openStatsModal() {
     const userId = localStorage.getItem('userId'); // Get ID from storage
     
-    const response = await fetch(`/api/stats/summary/${userId}`);
-    const data = await response.json();
+    try {
+        const response = await fetch(`/api/stats/summary/${userId}`);
+        const data = await response.json();
+        
+        let username = localStorage.getItem('username');
+        // If the local storage doesn't contain the username, set value from DB
+        if (!username && data.username) {
+            localStorage.setItem('username', data.username);
+            username = data.username;
+        }
+        document.getElementById('stat-sheet-title').innerText = `${username}'s Stat Sheet`;
     
-    let username = localStorage.getItem('username');
-    // If the local storage doesn't contain the username, set value from DB
-    if (!username && data.username) {
-        localStorage.setItem('username', data.username);
-        username = data.username;
+        // Update Today's Banner
+        const todayDetails = document.getElementById('today-details');
+        if (data.today) {
+            todayDetails.innerHTML = `Sleep: <b>${data.today.sleep_hours}h</b> | Workout: <b>${data.today.workout_time}m</b> | Mood: <i>"${data.today.mood}"</i>`;
+        } else {
+            todayDetails.innerHTML = "No stats recorded for today yet, Hero!";
+        }
+    
+        // Update 7-Day Averages
+        document.getElementById('sleep-avg-display').innerText = `${Number(data.averages.avgSleep || 0).toFixed(2)}h`;
+        document.getElementById('work-avg-display').innerText = `${Math.round(data.averages.avgWork || 0)}m`;
+    
+        // Update History Table
+        const tableBody = document.getElementById('history-table-body');
+        tableBody.innerHTML = data.history.map(row => `
+            <tr>
+                <td>${row.formattedDate}</td>
+                <td>${row.sleep_hours}h</td>
+                <td>${row.workout_time}m</td>
+                <td>${row.mood || '—'}</td>
+            </tr>
+        `).join('');
+    
+        document.getElementById('statsModal').style.display = 'flex';
+    } catch (error) {
+        console.error("Stats modal error: ", error);
+        showToast("Unable to load stats", "error");
     }
-    document.getElementById('stat-sheet-title').innerText = `${username}'s Stat Sheet`;
-
-    // Update Today's Banner
-    const todayDetails = document.getElementById('today-details');
-    if (data.today) {
-        todayDetails.innerHTML = `Sleep: <b>${data.today.sleep_hours}h</b> | Workout: <b>${data.today.workout_time}m</b> | Mood: <i>"${data.today.mood}"</i>`;
-    } else {
-        todayDetails.innerHTML = "No stats recorded for today yet, Hero!";
-    }
-
-    // Update 7-Day Averages
-    document.getElementById('sleep-avg-display').innerText = `${Number(data.averages.avgSleep || 0).toFixed(2)}h`;
-    document.getElementById('work-avg-display').innerText = `${Math.round(data.averages.avgWork || 0)}m`;
-
-    // Update History Table
-    const tableBody = document.getElementById('history-table-body');
-    tableBody.innerHTML = data.history.map(row => `
-        <tr>
-            <td>${row.formattedDate}</td>
-            <td>${row.sleep_hours}h</td>
-            <td>${row.workout_time}m</td>
-            <td>${row.mood || '—'}</td>
-        </tr>
-    `).join('');
-
-    document.getElementById('statsModal').style.display = 'flex';
 }
 
 function closeStatsModal() {
